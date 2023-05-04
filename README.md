@@ -1,69 +1,45 @@
 # Viewmode
 
-A technology specification and RDF ontology for having configurable view modes on top of SHACL shapes for a frontend website.
+A technology specification and RDF ontology (both in development) for having configurable views of RDF data on top of the [SHACL](https://www.w3.org/TR/shacl/) and [DASH](https://datashapes.org/forms.html) vocabularies for an application, regardless of any implementation stack, but mainly focused on websites.
 
 ## Introduction
 
-Where do you have the configuration of display widgets that define how a piece of data looks? With a headless CMS this often shifts to the frontend. But what if you would like to have your frontend highly customizable with a UI?
+Creating apps and websites can be tedious. Re-use of visual building blocks makes for a faster development phase. Re-using how things look would enable for applications that mostly focus on the business logic. 
 
-## Components
+SHACL is an excellent way to have portable data constraints. Similar to how a relation database has database constraints, a SHACL shape is a set of constraints on a specific type of RDF data.
 
-### Frontend preparation
+DASH builds on top of this and enables us to have forms rendered from SHACL shapes. Another part that DASH has are dash:viewers. These dash:viewers can show data depending on configuration and the actual types of the data. It is resiliant, the data may be entered incorrectly but it would still display.
 
-- Every value for a predicate in your SHACL shape can have a different display widget and possible configuration for the widget.
-- Create widgets that are JavaScript objects, functions or classes.
-- Add static properties defining configurables (booleans, enums and inputs).
-- Export all your widgets configurables from one ES module. You can statically exports this as JSON or as a JavaScript object.
-- Enable [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) for your homepage and the widgets ES module.
+The ViewMode specification aims to bridge the gap from SHACL and DASH to a workable implementation that supports different frontends to gather the available dash:editors and dash:viewers from, have viewers without an sh:path.
 
-### Admin UI
+Another part that needs bridging is a way of glueing it all together. This specification also will propose an editor for SHACL shapes to create SHACL ViewModes (a SHACL shape focused on the dash:viewers).
 
-- Use [SHACL shape](https://www.w3.org/TR/shacl/) for defining your data, make sure they are accesible by the admin UI. Basic Auth is possible.
-- Use the UI CustomElement: 
-```HTML
-<viewmode-ui 
-  shacl="https://backend.com/shapes/person.shacl.ttl"
-  widgets="https://example.com/widgets.mjs"
-/>
-```
+## General idea
 
-```JavaScript
-const ui = document.querySelector('viewmode-ui')
-ui.addEventListener('save', (turtle) => {
-  // Save the viewmode turtle file to your backend.
-})
-```
+You will have at least one SHACL shape for your form and render that with a SHACL form renderer. Another SHACL shape is aimed at displaying, will be made. To make these a visual administrative interface for creating and editing these shapes would be great.
 
-### Frontend render
+Parts:
 
-- When rendering the frontend make sure to load the viewmode turtle file and render accordingly.
+- SHACL form renderder (not part of this spec, an initiative is starting inside the rdfjs/public Gitter group)
+- SHACL ViewMode editor
+- SHACL ViewMode renderer
 
-```Turtle
-PREFIX viewmode: <http://example.com/viewmodes/>
-PREFIX widget: <http://example.com/widgets/>
-PREFIX vm: <http://viewmode.danielbeeke.nl/ontology#>
+## What is a SHACL ViewMode?
 
-viewmode:full
-  vm:shape <https://my-backend.com/person.shape.ttl> ;
-  vm:wrapper "<div class='person full'>" ;
+A SHACL ViewMode is an ordinary SHACL shape but it does not have dash:editor predicates. It does have dash:viewer predicates. It is only focused on displaying the data versus creating and editing.
 
-  vm:group [
-    a vm:Group ;
-    vm:items [
+### Why would we need a seperate document / shape for viewing?
 
-      vm:item [
-        a vm:Item ;
-        vm:predicate schema:name ;
-        vm:widget widgets:Label ;
-        vm:wrapper "<div class='name'>"
-        vm:config [
-          widgets:Label/bold true ;
-        ] ;
-      ] ;
+A SHACL ViewMode might not display all the SHACL properties that a form has. 
 
-    ] ;
-  ] ;
+## What is a SHACL (ViewMode) editor?
 
+A SHACL ViewMode editor is a visual user interface for an end-user to create a SHACL shape. This editor can be used both for creating standard SHACL shapes for the purpose of validation or forms and it can be used to create SHACL ViewModes.
 
-```
+This editor could be a visual editor where you can make nested layouts with sh:group predicates. And it can connect to a frontend and request all the available dash:editors and dash:viewers and their vm:configurables.
 
+TBD
+
+## What is a SHACL ViewMode renderer?
+
+TBD
