@@ -22,8 +22,11 @@ Predicates for:
 
 - Specifying which frontend to connect to, to gather dash:editors and dash:viewers
 - Passing configurables from the dash:editors and dash:viewers, will these be mini SHACL shapes?
+- Layouts that are tied to sh:group
 
 ## General idea
+
+![Architecture](architecture.svg)
 
 You will have at least one SHACL shape for your form and render that with a SHACL form renderer. Another SHACL shape that is aimed at displaying, will be made. This shape must also be a vm:ViewMode. To make these SHACL shapes a visual administrative interface for creating and editing these shapes would be great.
 
@@ -53,18 +56,21 @@ A SHACL ViewMode renderer, renders the given SHACL ViewMode in HTML or in any ot
 
 ## Example of a SHACL ViewMode
 
-```
+```turtle
+@prefix frontend: <https://example.com/> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix shacl: <http://www.w3.org/ns/shacl#> .
+@prefix vm: <https://viewmode.dev/ontology#> .
 
 ex:PersonShapeViewMode
 	a sh:NodeShape, vm:ViewMode ;
 	sh:targetClass ex:Person ;
-  vm:frontend [
-    vm:interface (
-      <http://localhost:3000/viewmode.ttl>, 
-      <https://example.com/viewmode.ttl>
-    ) ;
-    vm: 
-  ] ;
+	sh:shapesGraph ex:PersonShape ;
+
+	vm:interface (
+		<http://localhost:3000/viewmode.ttl>, 
+		<https://example.com/viewmode.ttl>
+	) ;
 
 	sh:property [
 		sh:path ex:name ;
@@ -102,7 +108,12 @@ ex:PersonShapeViewMode
 
 http://localhost:3000/viewmode.ttl
 
-```
+```turtle
+@prefix frontend: <https://example.com/> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix shacl: <http://www.w3.org/ns/shacl#> .
+@prefix vm: <https://viewmode.dev/ontology#> .
+
 frontend:ssn a dash:SingleViewer ;
   rdfs:label "SSN label" ;
   sh:node frontend:labelConfigurableShape, frontend:ssnConfigurableShape .
