@@ -1,10 +1,12 @@
-# Viewmode
+- Editor: [Daniel Beeke](mailto:mail@danielbeeke.nl)
+- Last edit: May 5, 2023
+- Status: In development
 
-A technology specification and RDF ontology (both in development) for having configurable views of RDF data on top of the [SHACL](https://www.w3.org/TR/shacl/) and [DASH](https://datashapes.org/forms.html) vocabularies for an application, regardless of any implementation stack, but mainly focused on websites.
+A technology specification and RDF ontology for having configurable views of RDF data on top of the [SHACL](https://www.w3.org/TR/shacl/) and [DASH](https://datashapes.org/forms.html) vocabularies for an application, regardless of any implementation stack, but mainly focused on websites.
 
 ## Introduction
 
-Creating apps and websites can be tedious. Re-use of visual building blocks makes for a faster development phase. Re-using how things look would enable for applications that mostly focus on the business logic. 
+Creating apps and websites can be tedious. Re-use of visual building blocks makes for a faster development phase. Re-using how things look would help developers to mostly focus on the business logic. 
 
 SHACL is an excellent way to have portable data constraints. Similar to how a relation database has database constraints, a SHACL shape is a set of constraints on a specific type of RDF data.
 
@@ -14,19 +16,26 @@ The ViewMode specification aims to bridge the gap from SHACL and DASH to a worka
 
 Another part that needs bridging is a way of glueing it all together. This specification also will propose an editor for SHACL shapes to create SHACL ViewModes (a SHACL shape focused on the dash:viewers).
 
+## Concrete missing parts in SHACL and DASH
+
+Predicates for:
+
+- Specifying which frontend to connect to, to gather dash:editors and dash:viewers
+- Passing configurables from the dash:editors and dash:viewers, will these be mini SHACL shapes?
+
 ## General idea
 
-You will have at least one SHACL shape for your form and render that with a SHACL form renderer. Another SHACL shape is aimed at displaying, will be made. To make these a visual administrative interface for creating and editing these shapes would be great.
+You will have at least one SHACL shape for your form and render that with a SHACL form renderer. Another SHACL shape that is aimed at displaying, will be made. This shape must also be a vm:ViewMode. To make these SHACL shapes a visual administrative interface for creating and editing these shapes would be great.
 
 Parts:
 
-- SHACL form renderder (not part of this spec, an initiative is starting inside the rdfjs/public Gitter group)
+- SHACL form renderder (not part of this spec, an initiative is starting inside the [rdfjs/public Gitter group](https://app.gitter.im/#/room/#rdfjs_public:gitter.im))
 - SHACL ViewMode editor
 - SHACL ViewMode renderer
 
 ## What is a SHACL ViewMode?
 
-A SHACL ViewMode is an ordinary SHACL shape but it does not have dash:editor predicates. It does have dash:viewer predicates. It is only focused on displaying the data versus creating and editing.
+A SHACL ViewMode is an ordinary SHACL shape but it does not have dash:editor predicates. It also does not have SHACL properties it does not want to display. It may have dash:viewer predicates. It is only focused on displaying the data versus creating and editing.
 
 ### Why would we need a seperate document / shape for viewing?
 
@@ -34,12 +43,10 @@ A SHACL ViewMode might not display all the SHACL properties that a form has.
 
 ## What is a SHACL (ViewMode) editor?
 
-A SHACL ViewMode editor is a visual user interface for an end-user to create a SHACL shape. This editor can be used both for creating standard SHACL shapes for the purpose of validation or forms and it can be used to create SHACL ViewModes.
+A SHACL ViewMode editor is a visual user interface for a developer or system administrator to create a SHACL shape. This editor can be used both for creating standard SHACL shapes for the purpose of validation or forms and it can be used to create SHACL ViewModes.
 
 This editor could be a visual editor where you can make nested layouts with sh:group predicates. And it can connect to a frontend and request all the available dash:editors and dash:viewers and their vm:configurables.
 
-TBD
-
 ## What is a SHACL ViewMode renderer?
 
-TBD
+A SHACL ViewMode renderer, renders the given SHACL ViewMode in HTML or in any other language / system. The SHACL ViewMode renderder is also responsible to transfer the available dash:editors and dash:viewers and their configurables to the SHACL (ViewMode) editor.
