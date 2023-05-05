@@ -2,7 +2,7 @@
 - Last edit: May 5, 2023
 - Status: In development
 
-A technology specification and RDF ontology for having configurable views of RDF data on top of the [SHACL](https://www.w3.org/TR/shacl/) and [DASH](https://datashapes.org/forms.html) vocabularies for an application, regardless of any implementation stack, but mainly focused on websites.
+A technology specification and RDF ontology for having server driven UIs of RDF data specific per frontend on top of the [SHACL](https://www.w3.org/TR/shacl/) and [DASH](https://datashapes.org/forms.html) vocabularies.
 
 ## Introduction
 
@@ -50,3 +50,93 @@ This editor could be a visual editor where you can make nested layouts with sh:g
 ## What is a SHACL ViewMode renderer?
 
 A SHACL ViewMode renderer, renders the given SHACL ViewMode in HTML or in any other language / system. The SHACL ViewMode renderder is also responsible to transfer the available dash:editors and dash:viewers and their configurables to the SHACL (ViewMode) editor.
+
+## Example of a SHACL ViewMode
+
+```
+
+ex:PersonShapeViewMode
+	a sh:NodeShape, vm:ViewMode ;
+	sh:targetClass ex:Person ;
+  vm:frontend [
+    vm:interface (
+      <http://localhost:3000/viewmode.ttl>, 
+      <https://example.com/viewmode.ttl>
+    ) ;
+    vm: 
+  ] ;
+
+	sh:property [
+		sh:path ex:name ;
+		sh:maxCount 1 ;
+		sh:datatype xsd:string ;
+	] ;
+
+	sh:property [
+		sh:path ex:ssn ;
+		sh:maxCount 1 ;
+		sh:datatype xsd:string ;
+    sh:viewer frontend:ssn ;
+	] ;
+
+	sh:property [
+		sh:path ex:ssn ;
+		sh:maxCount 1 ;
+		sh:datatype xsd:string ;
+    sh:viewer frontend:ssn ;
+	] ;
+
+	sh:property [
+		sh:path ex:worksFor ;
+		sh:class ex:Company ;
+		sh:nodeKind sh:IRI ;
+    sh:viewer [
+      vm:nestedViewMode ex:CompanyShapeViewMode ;
+    ] ;
+	]
+.
+
+```
+
+## Example of the data that is transfered between the frontend and the SHACL editor
+
+http://localhost:3000/viewmode.ttl
+
+```
+frontend:ssn a dash:SingleViewer ;
+  rdfs:label "SSN label" ;
+  sh:node frontend:labelConfigurableShape, frontend:ssnConfigurableShape .
+
+frontend:ssnConfigurableShape a sh:NodeShape ;
+  sh:property [
+		sh:path frontend:showDashes ;
+		sh:maxCount 1 ;
+		sh:datatype xsd:boolean ;
+	] .
+
+vm:nestedViewMode a dash:SingleViewer ;
+  rdfs:label "Nested ViewMode" .
+  sh:node frontend:nestedViewModeConfigurableShape .
+
+frontend:nestedViewModeConfigurableShape a sh:NodeShape ;
+  sh:property [
+		sh:path vm:showLabel ;
+		sh:maxCount 1 ;
+		sh:datatype xsd:boolean ;
+	] .
+
+frontend:labelConfigurableShape a sh:NodeShape ;
+  sh:property [
+		sh:path rdfs:label ;
+		sh:datatype sh:stringOrLangString ;
+	] ;
+
+  sh:property [
+		sh:path vm:showLabel ;
+		sh:maxCount 1 ;
+		sh:datatype xsd:boolean ;
+	] ;
+  .
+
+
+```
