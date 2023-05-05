@@ -1,62 +1,52 @@
 - Editor: [Daniel Beeke](mailto:mail@danielbeeke.nl)
 - Last edit: May 5, 2023
-- Status: In development
+- Status: In active development
 
-A technology specification and RDF ontology for having server driven UIs of RDF data specific per frontend on top of the [SHACL](https://www.w3.org/TR/shacl/) and [DASH](https://datashapes.org/forms.html) vocabularies.
+A technology specification and RDF ontology for server driven user interfaces composed of RDF data and widgets (dash:Viewers). This specification allows for specific widgets (dash:Viewers) and layouts per frontend, these frontends may be websites but can also be native applications. This specification builds further on the [SHACL](https://www.w3.org/TR/shacl/) and [DASH](https://datashapes.org/forms.html) vocabularies.
 
 ## Introduction
 
-Creating apps and websites can be tedious. Re-use of visual building blocks makes for a faster development phase. Re-using how things look would help developers to mostly focus on the business logic. 
+Creating apps and websites can be tedious. Re-use of visual building blocks makes for a faster development phase. Re-using how things look also help developers to mostly focus on the business logic. 
 
-SHACL is an excellent way to have portable data constraints. Similar to how a relation database has database constraints, a SHACL shape is a set of constraints on a specific type of RDF data.
+SHACL is an excellent way for having portable data constraints. Similar to how a relational database has database constraints, a SHACL shape is a set of constraints on a specific type of RDF data.
 
-DASH builds on top of this and enables us to have forms rendered from SHACL shapes. Another part that DASH has are dash:viewers. These dash:viewers can show data depending on configuration and the actual types of the data. It is resiliant, the data may be entered incorrectly but it would still display.
+DASH builds on top of this and enables us to have forms rendered from SHACL shapes. Another part that DASH has are dash:viewers. These dash:viewers can show data depending on configuration and the actual types of the data. It is resilient, the data may be entered incorrectly but it would still display according to their data types. 
 
-The ViewMode specification aims to bridge the gap from SHACL and DASH to a workable implementation that supports different frontends to gather the available dash:editors and dash:viewers from, have viewers without an sh:path.
+The ViewMode specification builds further on these with:
 
-Another part that needs bridging is a way of glueing it all together. This specification also will propose an editor for SHACL shapes to create SHACL ViewModes (a SHACL shape focused on the dash:viewers).
+- __SHACL ViewModes__, which is a SHACL shape catered to server driver Uis
+- __Frontend ViewMode capabilities__ a specification for frontends to define what dash:Viewers they have available. It also allows a dash:Viewer to define settings that can be configured in the SHACL ViewMode.
+- __ViewMode Layouts__ for use inside a sh:Group via vm:Layout. These layouts are living inside the frontend. They have some crude visual definition.
+- __A SHACL ViewMode editor__ a suggestion how you could tie all these components together with a visual editor to make SHACL ViewModes.
 
-## Concrete missing parts in SHACL and DASH
+## SHACL ViewModes
 
-Predicates for:
+A SHACL ViewMode is a SHACL shape that only has SHACL properties that may be shown. Some SHACL properties might have a dash:viewer. There might be additional predicates inside a SHACL property, the predicates are defined by the SHACL shape of the specified dash:Viewer. 
 
-- Specifying which frontend to connect to, to gather dash:editors and dash:viewers
-- Passing configurables from the dash:editors and dash:viewers, will these be mini SHACL shapes?
-- Layouts that are tied to sh:group
+### Required properties
 
-## General idea
+A SHACL ViewMode MUST have the following properties inside the sh:NodeShape
 
-![Architecture](architecture.svg)
+- sh:targetClass
 
-You will have at least one SHACL shape for your form and render that with a SHACL form renderer. Another SHACL shape that is aimed at displaying, will be made. This shape must also be a vm:ViewMode. To make these SHACL shapes a visual administrative interface for creating and editing these shapes would be great.
+A SHACL ViewMode MAY have the following properties inside the sh:NodeShape
 
-Parts:
+- sh:shapesGraph
+- vm:interface
+- vm:mode
+- vm:layout
 
-- SHACL form renderder (not part of this spec, an initiative is starting inside the [rdfjs/public Gitter group](https://app.gitter.im/#/room/#rdfjs_public:gitter.im))
-- SHACL ViewMode editor
-- SHACL ViewMode renderer
+#### sh:interface
 
-## What is a SHACL ViewMode?
+The sh:interface must be an URL to the frontend its __Frontend ViewMode capabilities__ document. If there are multiple documents possible it is allowed to have an ordered list. This helps with development so that your local development server has preference on the production server where still old code may be deployed. Intergrations always have to try the sh:interface values in order and use the first one that is responding with a HTTP 200.
 
-A SHACL ViewMode is an ordinary SHACL shape but it does not have dash:editor predicates. It also does not have SHACL properties it does not want to display. It may have dash:viewer predicates. It is only focused on displaying the data versus creating and editing.
+### SHACL properties without an sh:path
 
-### Why would we need a seperate document / shape for viewing?
+A SHACL ViewMode may have SHACL properties without an sh:path. If no sh:path is given a vm:element MUST be set. The value must be something that inherits vm:Element. A vm:Element could be a favorite button, a share button or something similar, where the goal of the element is not represent some data part of a RDF document, but something about the document itself (for example: sharing it) or UI buttons that do something with the layout and have nothing to do with the data. Like increasing the font size.
 
-A SHACL ViewMode might not display all the SHACL properties that a form has. 
+### Example of a SHACL ViewMode
 
-## What is a SHACL (ViewMode) editor?
-
-A SHACL ViewMode editor is a visual user interface for a developer or system administrator to create a SHACL shape. This editor can be used both for creating standard SHACL shapes for the purpose of validation or forms and it can be used to create SHACL ViewModes.
-
-This editor could be a visual editor where you can make nested layouts with sh:group predicates. And it can connect to a frontend and request all the available dash:editors and dash:viewers and their vm:configurables.
-
-## What is a SHACL ViewMode renderer?
-
-A SHACL ViewMode renderer, renders the given SHACL ViewMode in HTML or in any other language / system. The SHACL ViewMode renderder is also responsible to transfer the available dash:editors and dash:viewers and their configurables to the SHACL (ViewMode) editor.
-
-## Example of a SHACL ViewMode
-
-```turtle
+```Turtle
 @prefix frontend: <https://example.com/> .
 @prefix dash: <http://datashapes.org/dash#> .
 @prefix shacl: <http://www.w3.org/ns/shacl#> .
@@ -66,7 +56,8 @@ ex:PersonShapeViewMode
 	a sh:NodeShape, vm:ViewMode ;
 	sh:targetClass ex:Person ;
 	sh:shapesGraph ex:PersonShape ;
-
+	vm:mode frontend:ViewMode/card ;
+	vm:layout frontend:TwoColumn ;
 	vm:interface (
 		<http://localhost:3000/viewmode.ttl>, 
 		<https://example.com/viewmode.ttl>
@@ -76,39 +67,51 @@ ex:PersonShapeViewMode
 		sh:path ex:name ;
 		sh:maxCount 1 ;
 		sh:datatype xsd:string ;
+		sh:group frontend:TwoColumn/Left ;
+	] ;
+
+	sh:property [
+		vm:element frontend:shareButtons ;
+		sh:group frontend:TwoColumn/Top ;
 	] ;
 
 	sh:property [
 		sh:path ex:ssn ;
 		sh:maxCount 1 ;
 		sh:datatype xsd:string ;
-    sh:viewer frontend:ssn ;
+		sh:viewer frontend:ssn ;
+		sh:group frontend:TwoColumn/Left ;
+		rdfs:label "SSN" ;
+		rdfs:description "The social security number of the person" ;
 	] ;
 
 	sh:property [
-		sh:path ex:ssn ;
-		sh:maxCount 1 ;
+		sh:group frontend:TwoColumn/Right ;
+		sh:path ex:about ;
 		sh:datatype xsd:string ;
-    sh:viewer frontend:ssn ;
-	] ;
+		rdfs:label "About" ;
+	]
 
 	sh:property [
+		sh:group frontend:TwoColumn/Right ;
 		sh:path ex:worksFor ;
 		sh:class ex:Company ;
 		sh:nodeKind sh:IRI ;
-    sh:viewer [
-      vm:nestedViewMode ex:CompanyShapeViewMode ;
-    ] ;
+		sh:viewer [ vm:nestedViewMode ex:CompanyShapeViewMode ] ;
+		rdfs:label "Company" ;
 	]
 .
-
 ```
 
-## Example of the data that is transfered between the frontend and the SHACL editor
+## Frontend ViewMode capabilities
 
-http://localhost:3000/viewmode.ttl
+For server driven UI there is a relationship between the server and the frontend. The frontend defines which widgets (dash:Viewer and vm:Elements) are available and the server has configuration (a SHACL ViewMode) specific to a frontend in the datastore.
 
-```turtle
+For a SHACL ViewMode editor to find out which widgets are available we have the concept: __Frontend ViewMode capabilities__. This is a document that is found at a URL. 
+
+### Example of a __Frontend ViewMode capabilities__ document
+
+```Turtle
 @prefix frontend: <https://example.com/> .
 @prefix dash: <http://datashapes.org/dash#> .
 @prefix shacl: <http://www.w3.org/ns/shacl#> .
@@ -149,5 +152,50 @@ frontend:labelConfigurableShape a sh:NodeShape ;
 	] ;
   .
 
+# And also layouts see in the next chapter.
 
 ```
+
+## ViewMode Layouts
+
+To tie everything together we also need some way of defining what kind of layouts the frontend supports.
+Layouts enable use to group widgets in certain areas / groups of the layout.
+The visual styles of these layouts need to be communicated in their most simple form. For this we use the CSS Grid syntax. 
+
+These layouts can be included in a SHACL ViewMode renderer.
+
+```Turtle
+
+frontend:TwoColumn a vm:Layout ;
+	vm:cssClass "two-columns" ;
+	vm:gridStyles """
+		display: grid;
+		grid-template-columns: 1fr 300px;
+		grid-template-rows: 1fr;
+		grid-auto-rows: 1fr;
+		gap: 0px 0px;
+		grid-auto-flow: row;
+		grid-template-areas: "left right";
+	""" ;
+	sh:group frontend:TwoColumn/Left, 
+		frontend:TwoColumn/Right .
+
+frontend:TwoColumn/Left
+	a sh:PropertyGroup ;
+	sh:order 0 ;
+	vm:areaName "left" .
+
+frontend:TwoColumn/Right
+	a sh:PropertyGroup ;
+	sh:order 1 ;
+	vm:areaName "right" .
+
+```
+
+## A SHACL ViewMode editor
+
+To get this system up and running we need an editor that enables us to create SHACL ViewModes and possibly SHACL shapes.
+
+A SHACL ViewMode editor will support all dash:Viewers from the DASH specification if no vm:interface is given. When given a vm:interface it will only support the given dash:Viewers and vm:Elements.
+
+If no SHACL shape is given, it will be possible to generate SHACL properties for arbitrary predicates. If a SHACL shape is given only the given predicates will be supported.
