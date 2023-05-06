@@ -36,9 +36,17 @@ A SHACL ViewMode MAY have the following properties inside the sh:NodeShape
 - vm:mode
 - vm:layout
 
-#### sh:interface
+#### vm:interface
 
 The sh:interface must be an URL to the frontend its __Frontend ViewMode capabilities__ document. If there are multiple documents possible it is allowed to have an ordered list. This helps with development so that your local development server has preference on the production server where still old code may be deployed. Intergrations always have to try the sh:interface values in order and use the first one that is responding with a HTTP 200.
+
+#### vm:mode
+
+A predicate that references one of the ViewModes classes that are about displays of things such as vm:Card, vm:Teaser, vm:Full, vm:Line, vm:Highlight etc. This list is not conclusive, you can also create your own vm:mode values. 
+
+### vm:layout
+
+See __ViewMode Layouts__, the vm:layout holds the IRI of the selected layout. If no layout is given and inside the SHAPE some groups have a layout this group should be renderend at the top and the layouts below it.
 
 ### SHACL properties without an sh:path
 
