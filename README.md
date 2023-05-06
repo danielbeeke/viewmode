@@ -1,5 +1,5 @@
 - Editor: [Daniel Beeke](mailto:mail@danielbeeke.nl)
-- Last edit: May 5, 2023
+- Last edit: May 6, 2023
 - Status: In active development
 
 A technology specification and RDF ontology for server driven user interfaces composed of RDF data and widgets (dash:Viewers). This specification allows for specific widgets (dash:Viewers) and layouts per frontend, these frontends may be websites but can also be native applications. This specification builds further on the [SHACL](https://www.w3.org/TR/shacl/) and [DASH](https://datashapes.org/forms.html) vocabularies.
